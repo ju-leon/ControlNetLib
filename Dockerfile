@@ -34,7 +34,22 @@ COPY ./environment.yaml /tmp/environment.yaml
 RUN conda update conda -y
 RUN conda env create -f /tmp/environment.yaml
 
+RUN echo "source activate base" >> ~/.bashrc
 RUN echo "conda activate control" >> ~/.bashrc
-ENV PATH /opt/conda/envs/control/bin:$PATH
-ENV CONDA_DEFAULT_ENV $control
+ENV PATH=/opt/conda/envs/control/bin:$PATH
+ENV CONDA_DEFAULT_ENV=control
 
+WORKDIR /repo
+# RUN /root/miniconda3/envs/control/bin/python rest_service.py /repo/models/control_sd15_canny.pth tumor
+
+# RUN source activate base
+# RUN conda activate control
+
+# Copy files
+# COPY . /app
+
+# install requirements
+# RUN pip install -r requirements.txt
+
+# run app
+# CMD ["python", "rest_service.py"]

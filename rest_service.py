@@ -5,6 +5,7 @@ from fastapi import FastAPI, APIRouter
 import uvicorn
 import configparser
 import os
+from pytorch_lightning import seed_everything
 
 app = FastAPI()
 
@@ -20,8 +21,12 @@ def main():
     config = configparser.ConfigParser()
     config.read(args.config_file)
     model_path = config.get('model','path')
+    seed = config.get('model','seed')
 
     generation_type = config.get('application','type')
+
+    # Seed all random ops to allow reproduciable results
+    seed_everything(seed)
 
     preprocess_func = None
     postprocess_func = None
@@ -37,12 +42,10 @@ def main():
         preprocess_func = preprocess
         postprocess_func = postprocess
     
-    model = ControlNet(model_path)
+    model = ControlNet(model_path, seed = seed)
     
     rest_api = RestAPI(model, preprocess_func, postprocess_func)
     app.include_router(rest_api.router, prefix=f"/{generation_type}")
-
-    print("Starting server ...")
 
 if __name__ == "__main__":
     main()

@@ -4,6 +4,7 @@ import numpy as np
 import random
 import torch
 import sys
+from pytorch_lightning import seed_everything
 
 sys.path.insert(1, 'ControlNet')
 from share import *
@@ -32,7 +33,7 @@ a_prompt = 'good quality' # 'best quality, extremely detailed'
 n_prompt = 'animal, drawing, painting, vivid colors, longbody, lowres, bad anatomy, bad hands, missing fingers, extra digit, fewer digits, cropped, worst quality, low quality'
 
 class ControlNet(torch.nn.Module):
-    def __init__(self, model_path: str):
+    def __init__(self, model_path: str, seed: int):
         """
         Initialize ControlNet instance.
 
@@ -47,6 +48,8 @@ class ControlNet(torch.nn.Module):
 
         self.ddim_sampler = DDIMSampler(self.model)
 
+        self.seed = seed
+
     def forward(self, img: torch.Tensor, promt: str, **kwargs) -> torch.Tensor:
         """
         Forward method for ControlNet inference.
@@ -59,6 +62,8 @@ class ControlNet(torch.nn.Module):
         Returns:
             torch.Tensor: The output image.
         """
+        seed_everything(seed)
+
         img = resize_image(HWC3(img), image_resolution)
         H, W, C = img.shape
 

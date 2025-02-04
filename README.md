@@ -17,5 +17,5 @@ sudo docker run -v .:/repo -it --net=bridge -p 8000:8000 --gpus all controlnet
 
 ```
 sudo docker build -t controlnet .
-sudo docker run -v .:/repo --net=bridge -p 8000:8000  --gpus all controlnet /root/miniconda3/envs/control/bin/python /repo/rest_service.py /repo/models/control_sd15_canny.pth tumor
+sudo docker run -v .:/repo --net=bridge -p 8000:8000  --gpus all controlnet /root/miniconda3/envs/control/bin/python /repo/rest_service.py /repo/models/ /repo/config/tumor_application.ini
 ```

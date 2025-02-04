@@ -30,8 +30,6 @@ class RestAPI():
         """
         try:
             contents = image.file.read()
-            with open(image.filename, 'wb') as f:
-                f.write(contents)
         except Exception:
             raise HTTPException(status_code=500, detail='Something went wrong')
         finally:
@@ -39,7 +37,6 @@ class RestAPI():
         
         img = np.fromstring(contents, dtype=np.uint8)    
         img = cv2.imdecode(img, cv2.IMREAD_COLOR)
-        print(img)
 
         preprocessed_image = self.preprocessor(img, (center_x, center_y), size)
 

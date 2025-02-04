@@ -3,6 +3,8 @@ from ControlNetLib.inference.control_net import ControlNet
 from ControlNetLib.rest.rest_api import RestAPI
 from fastapi import FastAPI, APIRouter
 import uvicorn
+import configparser
+import os
 
 app = FastAPI()
 
@@ -12,28 +14,33 @@ async def read_root():
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument("model_path", type=str)
-    parser.add_argument("generation_type", type=str)
+    parser.add_argument("config_file", type=str)
     args = parser.parse_args()
+
+    config = configparser.ConfigParser()
+    config.read(args.config_file)
+    model_path = config.get('model','path')
+
+    generation_type = config.get('application','type')
 
     preprocess_func = None
     postprocess_func = None
     service_call = None
 
-    if args.generation_type == "tumor":
+    if generation_type == "tumor":
         from ControlNetLib.generators.tumor_generation import preprocess, postprocess
         preprocess_func = preprocess.preprocess
         postprocess_func = postprocess.postprocess
         service_call = "generate_tumor"
-    elif args.generation_type == "normal":
+    elif generation_type == "alzheimer":
         from ControlNetLib.generators.alzheimer_generation import preprocess, postprocess
         preprocess_func = preprocess
         postprocess_func = postprocess
     
-    model = ControlNet(args.model_path)
+    model = ControlNet(model_path)
     
     rest_api = RestAPI(model, preprocess_func, postprocess_func)
-    app.include_router(rest_api.router, prefix=f"/{args.generation_type}")
+    app.include_router(rest_api.router, prefix=f"/{generation_type}")
 
     print("Starting server ...")
 

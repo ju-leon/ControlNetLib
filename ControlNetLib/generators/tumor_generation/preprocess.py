@@ -6,7 +6,7 @@ sys.path.insert(1, 'ControlNet')
 from annotator.canny import CannyDetector
 
 
-def preprocess(image: np.ndarray, tumor_location: tuple[int, int], tumor_size: int) -> np.ndarray:
+def preprocess(image: np.ndarray, tumor_location: tuple, tumor_size: int) -> np.ndarray:
     """
     Preprocesses an image by converting it to grayscale, resizing, applying Canny edge detection, and adding a synthetic tumor.
 

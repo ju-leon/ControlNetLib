@@ -27,6 +27,7 @@ def main():
 
     # Seed all random ops to allow reproduciable results
     seed_everything(seed)
+    model = ControlNet(model_path, seed = seed)    
 
     preprocess_func = None
     postprocess_func = None
@@ -48,7 +49,6 @@ def main():
     else:
         raise NotImplementedError
     
-    model = ControlNet(model_path, seed = seed)    
     app.include_router(rest_api.router, prefix=f"/{generation_type}")
 
 if __name__ == "__main__":

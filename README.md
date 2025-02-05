@@ -1,21 +1,47 @@
 # ControlNetLib
 
-## Download example model
+Example project on integrating ControlNet into a ready-to-deploy repository.
+
+To get started, clone the repository and init the submodule:
 ```
-cd models
-wget https://huggingface.co/lllyasviel/ControlNet/resolve/main/models/control_sd15_canny.pth?download=true
+git clone https://github.com/ju-leon/ControlNetLib.git
+cd ControlNetLib
+git submodule init 
+git submodule update
 ```
 
-## Launching an interactive Docker Container
+In a real-world scenario we might want to use a custom trained model. If you want to start with a pretrained model, you could go ahead and download StableDiffusion Canny Edge Model to the models folder:
+
+```
+mkdir models && cd models
+wget https://huggingface.co/lllyasviel/ControlNet/resolve/main/models/control_sd15_canny.pth
+```
+
+## Docker
+
+Docker can be used to easily deploy the application to new VMs. A Dockerfile setting up a container with all the needed prequireies is provided.
+
+> **_NOTE:_**  ControlNet expects a CUDA capable GPU.
+
+## Building docker container
+
+This command will build the container with the name 'controlnet'. This may take a while.
 
 ```
 sudo docker build -t controlnet .
+```
+
+## Launching an interactive container, e.g. for development
+```
 sudo docker run -v .:/repo -it --net=bridge -p 8000:8000 --gpus all controlnet
 ```
 
 ## Launching an inference container, e.g. for deployment
 
+A docker container containing all the requirements can be launched using:
 ```
 sudo docker build -t controlnet .
-sudo docker run -v .:/repo --net=bridge -p 8000:8000  --gpus all controlnet /root/miniconda3/envs/control/bin/python /repo/rest_service.py models/ config/tumor_application.ini
+sudo docker run -v .:/repo --net=bridge -p 8000:8000  --gpus all controlnet /root/miniconda3/envs/control/bin/python rest_service.py config/tumor_application.ini
 ```
+
+> **_NOTE:_**  The docker container does not contain or downloard pretrained weights. A vali path to model weights should be provided in config/tumor_application.ini, e.g. by downloading a pretrained model into models/

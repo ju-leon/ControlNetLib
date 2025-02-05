@@ -1,3 +1,4 @@
+![](resources/mri_brain.jpg)
 # ControlNetLib
 
 Example project on integrating ControlNet into a ready-to-deploy repository.
@@ -45,3 +46,27 @@ sudo docker run -v .:/repo --net=bridge -p 8000:8000  --gpus all controlnet /roo
 ```
 
 > **_NOTE:_**  The docker container does not contain or downloard pretrained weights. A vali path to model weights should be provided in config/tumor_application.ini, e.g. by downloading a pretrained model into models/
+
+## Accesing over REST
+
+Once the Docker container has been run successfull, REST post request can be placed on local ip and port 8000:
+```
+127.0.0.1:8000/
+```
+
+Documation for API calls are found under:
+```
+127.0.0.1:8000/docs
+```
+
+If you're runing the script on a remote machine, make sure to allow remote access to port 8000.
+
+To generate a new image using the tumor example application, put a HTTP POST request to:
+```
+127.0.0.1:8000/tumor/get_image?center_x=200&center_y=200&size=50
+```
+
+The POST request should contain an mri image of a healty brain. The application will use ControlNet to generate a tomur at the specified location with specified size.
+
+![](resources/api_call.png)
+![](resources/api_result.png)

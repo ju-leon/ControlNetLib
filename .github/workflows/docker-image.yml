@@ -7,17 +7,10 @@ on:
     branches: [ "main" ]
 
 jobs:
-
   build:
-
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
 
     steps:
-    - uses: Jimver/cuda-toolkit@v0.2.21
-      id: cuda-toolkit
-      with:
-        cuda: '11.3.0'
-
     - uses: actions/checkout@v4
     - name: Build the Docker image
       run: docker build . --file Dockerfile --tag controlnet:$(date +%s)

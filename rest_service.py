@@ -1,6 +1,6 @@
 import argparse
 from ControlNetLib.inference.control_net import ControlNet
-from ControlNetLib.rest.rest_api import RestAPI
+from ControlNetLib.rest.tumor_rest_endpoint import TumorRestAPI
 from fastapi import FastAPI, APIRouter
 import uvicorn
 import configparser
@@ -20,9 +20,9 @@ def main():
 
     config = configparser.ConfigParser()
     config.read(args.config_file)
+
     model_path = config.get('model','path')
     seed = config.get('model','seed')
-
     generation_type = config.get('application','type')
 
     # Seed all random ops to allow reproduciable results
@@ -30,19 +30,25 @@ def main():
 
     preprocess_func = None
     postprocess_func = None
-
+    rest_api = None
     if generation_type == "tumor":
         from ControlNetLib.generators.tumor_generation import preprocess, postprocess
         preprocess_func = preprocess.preprocess
         postprocess_func = postprocess.postprocess
+        rest_api = TumorRestAPI(model, preprocess_func, postprocess_func)
     elif generation_type == "alzheimer":
+        # Currently not implemented
+        raise NotImplementedError
+
+        # Example on how a future generator can be added to support multiple generation types
         from ControlNetLib.generators.alzheimer_generation import preprocess, postprocess
         preprocess_func = preprocess
         postprocess_func = postprocess
+        # other rest api ...
+    else:
+        raise NotImplementedError
     
-    model = ControlNet(model_path, seed = seed)
-    
-    rest_api = RestAPI(model, preprocess_func, postprocess_func)
+    model = ControlNet(model_path, seed = seed)    
     app.include_router(rest_api.router, prefix=f"/{generation_type}")
 
 if __name__ == "__main__":

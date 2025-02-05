@@ -6,44 +6,41 @@ from starlette.responses import StreamingResponse
 
 import numpy as np
 import cv2
+import torch
+from typing import Optional
 
 class RestAPI():
-    def __init__(self, model, preprocessor, postprocessor):
+    def __init__(self, model: torch.nn.Module, preprocessor: Optional[Callable] = None, postprocessor: Optional[Callable] = None):
+        """
+        Initialize a RestAPI for image generation microservice.
+
+        Args:
+            model (torch.nn.Module): A model to do inference
+            preprocessor (Optional[Callable]): Processing applied to the image before inference. If None, no preprocessing will be applied
+            postprocessor (Optional[Callable]): Processing applied to the result after inference. If None, no postprocessing will be applied
+        """
         super().__init__()
 
         self.model = model
+
+        if preprocessor is None:
+            preprocessor = lambda x: x
+
+        if postprocessor is None:
+            postprocessor = lambda x: x
+
         self.preprocessor = preprocessor
         self.postprocessor = postprocessor
 
         self.router = APIRouter()
-        self.router.add_api_route("/get_image", self.get_image, methods=["POST"])
 
-    async def get_image(self, image: UploadFile, center_x: int, center_y: int, size: int) -> dict:        
+    def register_route(self, url: str, function: Callable, methods: Optional[list] = None):
         """
-        A simple API endpoint that always returns a "Hello" message.
-        
+        Register a route to the router.
+
         Args:
-            image (str): An image, which is ignored.
-        
-        Returns:
-            dict: A dictionary with a "Hello" key and a "Demo" value.
+            url (str): The URL for the route
+            function (Callable): The function to be called when the route is accessed
+            methods (Optional[list]): The list of HTTP methods that the route accepts. If None, all methods are accepted
         """
-        try:
-            contents = image.file.read()
-        except Exception:
-            raise HTTPException(status_code=500, detail='Something went wrong')
-        finally:
-            image.file.close()
-        
-        img = np.fromstring(contents, dtype=np.uint8)    
-        img = cv2.imdecode(img, cv2.IMREAD_COLOR)
-
-        preprocessed_image = self.preprocessor(img, (center_x, center_y), size)
-
-        out = self.model.forward(preprocessed_image, "mri tumor image")[0]
-        
-        postprocessed_image = self.postprocessor(out)
-
-        res, im_png = cv2.imencode(".png", postprocessed_image)
-        return StreamingResponse(io.BytesIO(im_png.tobytes()), media_type="image/png")
-
+        self.router.add_api_route(url, function, methods=methods)

@@ -30,13 +30,11 @@ def main():
 
     preprocess_func = None
     postprocess_func = None
-    service_call = None
 
     if generation_type == "tumor":
         from ControlNetLib.generators.tumor_generation import preprocess, postprocess
         preprocess_func = preprocess.preprocess
         postprocess_func = postprocess.postprocess
-        service_call = "generate_tumor"
     elif generation_type == "alzheimer":
         from ControlNetLib.generators.alzheimer_generation import preprocess, postprocess
         preprocess_func = preprocess

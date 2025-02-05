@@ -40,3 +40,5 @@ ENV PATH=/opt/conda/envs/control/bin:$PATH
 ENV CONDA_DEFAULT_ENV=control
 
 WORKDIR /repo
+
+CMD ["root/miniconda3/envs/control/bin/python", "rest_service.py", "config/tumor_application.ini"]

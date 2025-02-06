@@ -34,7 +34,7 @@ sudo docker build -t controlnet .
 
 ## Launching an interactive container, e.g. for development
 ```
-sudo docker run -v .:/repo -it --net=bridge -p 8000:8000 --gpus all controlnet
+sudo docker run -v .:/repo -it --net=bridge -p 8000:8000 --gpus all controlnet bash
 ```
 
 ## Launching an inference container, e.g. for deployment

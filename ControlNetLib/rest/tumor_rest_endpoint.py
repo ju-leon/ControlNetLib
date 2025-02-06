@@ -42,7 +42,8 @@ class TumorRestAPI(RestAPI):
 
         preprocessed_image = self.preprocessor(img, (center_x, center_y), size)
 
-        out = self.model.forward(preprocessed_image, "mri tumor image")[0]
+        with torch.no_grad():
+            out = self.model.forward(preprocessed_image, "mri tumor image")[0]
         
         postprocessed_image = self.postprocessor(out)
 

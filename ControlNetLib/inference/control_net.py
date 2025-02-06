@@ -50,29 +50,28 @@ class ControlNet(torch.nn.Module):
 
         self.seed = seed
 
-    def forward(self, img: torch.Tensor, promt: str, **kwargs) -> torch.Tensor:
+    def forward(self, img: torch.Tensor, promt: str) -> torch.Tensor:
         """
         Forward method for ControlNet inference.
 
         Args:
             img (torch.Tensor): The input image.
             promt (str): The prompt to control the image generation.
-            **kwargs: Additional keyword arguments.
 
         Returns:
             torch.Tensor: The output image.
         """
         seed_everything(seed)
 
-        img = resize_image(HWC3(img), image_resolution)
-        H, W, C = img.shape
+        # img = resize_image(HWC3(img), image_resolution)
+        # H, W, C = img.shape
 
-        control = torch.from_numpy(img.copy()).float().cuda() / 255.0
-        control = torch.stack([control for _ in range(num_samples)], dim=0)
-        control = einops.rearrange(control, 'b h w c -> b c h w').clone()
+        # control = torch.from_numpy(img.copy()).float().cuda() / 255.0
+        # control = torch.stack([control for _ in range(num_samples)], dim=0)
+        _, C, H, W = img.shape
 
-        cond = {"c_concat": [control], "c_crossattn": [self.model.get_learned_conditioning([prompt + ', ' + a_prompt] * num_samples)]}
-        un_cond = {"c_concat": None if guess_mode else [control], "c_crossattn": [self.model.get_learned_conditioning([n_prompt] * num_samples)]}
+        cond = {"c_concat": [img], "c_crossattn": [self.model.get_learned_conditioning([prompt + ', ' + a_prompt] * num_samples)]}
+        un_cond = {"c_concat": None if guess_mode else [img], "c_crossattn": [self.model.get_learned_conditioning([n_prompt] * num_samples)]}
         shape = (4, H // 8, W // 8)
 
         self.model.control_scales = [strength * (0.825 ** float(12 - i)) for i in range(13)] if guess_mode else ([strength] * 13)  # Magic number. IDK why. Perhaps because 0.825**12<0.01 but 0.826**12>0.01
@@ -82,8 +81,6 @@ class ControlNet(torch.nn.Module):
                                                      unconditional_conditioning=un_cond)
         
         x_samples = self.model.decode_first_stage(samples)
-        x_samples = (einops.rearrange(x_samples, 'b c h w -> b h w c') * 127.5 + 127.5).cpu().numpy().clip(0, 255).astype(np.uint8)
+        x_samples = (einops.rearrange(x_samples, 'b c h w -> b h w c') * 127.5 + 127.5) #.cpu().numpy().clip(0, 255).astype(np.uint8)
 
-        results = [x_samples[i] for i in range(num_samples)]
-
-        return results
+        return x_samples
